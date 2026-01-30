@@ -1,0 +1,5 @@
+{
+  "name": "FFT Explorer: DIT Radix-2 Visualizer",
+  "description": "An interactive teaching tool for DSP students to visualize the Radix-2 Decimation-In-Time FFT algorithm, compare it with direct DFT, and understand computational complexity through live benchmarks and butterfly diagrams.",
+  "requestFramePermissions": []
+}
