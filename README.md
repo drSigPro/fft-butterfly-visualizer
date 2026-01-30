@@ -3,6 +3,7 @@
 <div align="center">
   <h3>Interactive Digital Signal Processing Educator</h3>
   <p>A powerful, interactive visualization tool for understanding the Decimation-in-Time (DIT) Radix-2 Fast Fourier Transform (FFT) algorithm.</p>
+  <p>The app is built using Google Antigravity.</p>
 </div>
 
 ## 🌟 Features
