@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { 
-  SignalPreset, SignalConfig, ComplexNumber, ComputationStats, 
-  ButterflyData 
+import {
+  SignalPreset, SignalConfig, ComplexNumber, ComputationStats,
+  ButterflyData
 } from './types';
 import { generateSignal } from './utils/signal';
-import { 
-  getDFT, getFFTStages, calculateOpCounts, benchmarkComputation 
+import {
+  getDFT, getFFTStages, calculateOpCounts, benchmarkComputation
 } from './utils/fft';
 import { Complex } from './utils/math';
 import SignalSettings from './components/SignalSettings';
@@ -19,8 +19,10 @@ const App: React.FC = () => {
   const [config, setConfig] = useState<SignalConfig>(() => {
     // Initial config from URL or defaults
     const params = new URLSearchParams(window.location.hash.slice(1));
+    const nParam = parseInt(params.get('N') || '16');
+    const N = [2, 4, 8, 16, 32].includes(nParam) ? nParam : 16;
     return {
-      N: parseInt(params.get('N') || '16'),
+      N,
       preset: (params.get('preset') as SignalPreset) || SignalPreset.TWO_TONES,
       f1: parseFloat(params.get('f1') || '2'),
       a1: parseFloat(params.get('a1') || '1'),
@@ -65,14 +67,14 @@ const App: React.FC = () => {
     const dftTime = benchmarkComputation(signal, getDFT);
     const fftTime = benchmarkComputation(signal, (s) => getFFTStages(s));
     const opCounts = calculateOpCounts(config.N);
-    
+
     setStats({
       dftTime,
       fftTime,
       dftOps: opCounts.dft,
       fftOps: opCounts.fft
     });
-    
+
     // Reset animation
     setActiveStage(0);
     setActiveButterfly(-1);
@@ -103,7 +105,7 @@ const App: React.FC = () => {
   const stepBackward = useCallback(() => {
     if (!fftData) return;
     if (activeStage === 0) return;
-    
+
     if (activeButterfly > 0) {
       setActiveButterfly(prev => prev - 1);
     } else if (activeStage > 1) {
@@ -153,9 +155,9 @@ const App: React.FC = () => {
             <p className="text-xs text-slate-400 font-medium uppercase tracking-widest">Interactive DSP Educator</p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-4">
-          <button 
+          <button
             onClick={() => setTeacherMode(!teacherMode)}
             className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${teacherMode ? 'bg-amber-500 text-white' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}
           >
@@ -189,7 +191,7 @@ const App: React.FC = () => {
                 <button onClick={stepBackward} className="w-10 h-10 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50">
                   <i className="fas fa-step-backward"></i>
                 </button>
-                <button 
+                <button
                   onClick={() => setIsPlaying(!isPlaying)}
                   className="w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-transform active:scale-95"
                 >
@@ -199,14 +201,14 @@ const App: React.FC = () => {
                   <i className="fas fa-step-forward"></i>
                 </button>
               </div>
-              
+
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-500 uppercase flex justify-between">
                   Speed <span>{playbackSpeed}ms</span>
                 </label>
-                <input 
-                  type="range" min="100" max="2000" step="100" 
-                  value={playbackSpeed} 
+                <input
+                  type="range" min="100" max="2000" step="100"
+                  value={playbackSpeed}
                   onChange={(e) => setPlaybackSpeed(parseInt(e.target.value))}
                   className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
                 />
@@ -227,7 +229,7 @@ const App: React.FC = () => {
           {/* Top Row: Butterfly Diagram */}
           <div className="flex-[3] min-h-[400px]">
             {fftData && (
-              <ButterflyVisualizer 
+              <ButterflyVisualizer
                 N={config.N}
                 input={inputSignal}
                 reordered={fftData.reordered}
@@ -242,15 +244,15 @@ const App: React.FC = () => {
 
           {/* Bottom Row: Charts */}
           <div className="flex-[2] relative min-h-[250px]">
-             <div className="absolute top-2 right-4 z-10 flex gap-2">
-                <button 
-                  onClick={() => setShowPhase(!showPhase)}
-                  className={`px-3 py-1 rounded text-[10px] font-bold border transition-colors ${showPhase ? 'bg-pink-100 border-pink-200 text-pink-600' : 'bg-slate-50 border-slate-200 text-slate-500'}`}
-                >
-                  {showPhase ? 'MAGNITUDE VIEW' : 'PHASE VIEW'}
-                </button>
-             </div>
-             <ComparisonCharts input={inputSignal} output={outputSignal} showPhase={showPhase} />
+            <div className="absolute top-2 right-4 z-10 flex gap-2">
+              <button
+                onClick={() => setShowPhase(!showPhase)}
+                className={`px-3 py-1 rounded text-[10px] font-bold border transition-colors ${showPhase ? 'bg-pink-100 border-pink-200 text-pink-600' : 'bg-slate-50 border-slate-200 text-slate-500'}`}
+              >
+                {showPhase ? 'MAGNITUDE VIEW' : 'PHASE VIEW'}
+              </button>
+            </div>
+            <ComparisonCharts input={inputSignal} output={outputSignal} showPhase={showPhase} />
           </div>
         </div>
       </main>
@@ -258,15 +260,15 @@ const App: React.FC = () => {
       {/* Footer Info */}
       {teacherMode && (
         <footer className="bg-amber-50 border-t border-amber-200 px-8 py-3 flex gap-8">
-           <div className="flex items-center gap-2 text-amber-800 text-xs">
-              <span className="font-bold">MATH:</span>
-              <code className="bg-amber-100 px-2 py-0.5 rounded">a' = a + W_N^k b</code>
-              <code className="bg-amber-100 px-2 py-0.5 rounded">b' = a - W_N^k b</code>
-           </div>
-           <div className="flex items-center gap-2 text-amber-800 text-xs">
-              <span className="font-bold">DIT Property:</span>
-              <span>Splits input index x[n] into even/odd sequences.</span>
-           </div>
+          <div className="flex items-center gap-2 text-amber-800 text-xs">
+            <span className="font-bold">MATH:</span>
+            <code className="bg-amber-100 px-2 py-0.5 rounded">a' = a + W_N^k b</code>
+            <code className="bg-amber-100 px-2 py-0.5 rounded">b' = a - W_N^k b</code>
+          </div>
+          <div className="flex items-center gap-2 text-amber-800 text-xs">
+            <span className="font-bold">DIT Property:</span>
+            <span>Splits input index x[n] into even/odd sequences.</span>
+          </div>
         </footer>
       )}
     </div>

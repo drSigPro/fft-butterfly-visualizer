@@ -14,15 +14,15 @@ interface Props {
   teacherMode: boolean;
 }
 
-const ButterflyVisualizer: React.FC<Props> = ({ 
-  N, 
-  input, 
-  reordered, 
-  stages, 
-  butterflies, 
-  activeStage, 
+const ButterflyVisualizer: React.FC<Props> = ({
+  N,
+  input,
+  reordered,
+  stages,
+  butterflies,
+  activeStage,
   activeButterflyIndex,
-  teacherMode 
+  teacherMode
 }) => {
   const logN = Math.log2(N);
   const stageWidth = 240;
@@ -50,20 +50,20 @@ const ButterflyVisualizer: React.FC<Props> = ({
   // Calculate live operation counts for the current animation step
   const liveOps = useMemo(() => {
     if (activeStage === 0) return { mults: 0, adds: 0 };
-    
+
     const completedStages = activeStage - 1;
     const bfsPerStage = N / 2;
-    
+
     // Each completed stage has N/2 butterflies. Each BF has 1 mult and 2 additions.
     let mults = completedStages * bfsPerStage;
     let adds = completedStages * N;
-    
+
     // Add operations from the current active stage
     if (activeButterflyIndex !== -1) {
       mults += (activeButterflyIndex + 1);
       adds += (activeButterflyIndex + 1) * 2;
     }
-    
+
     return { mults, adds };
   }, [activeStage, activeButterflyIndex, N]);
 
@@ -101,8 +101,9 @@ const ButterflyVisualizer: React.FC<Props> = ({
         <text x={padding + 20} y={40} className="text-sm font-bold fill-slate-500 uppercase tracking-widest">Input x[n]</text>
         <text x={padding + stageWidth + 20} y={40} className="text-sm font-bold fill-slate-500 uppercase tracking-widest">Bit Reversed</text>
         {Array.from({ length: logN }).map((_, i) => (
-          <text key={i} x={padding + (i + 2) * stageWidth + 20} y={40} className="text-sm font-bold fill-slate-500 uppercase tracking-widest">Stage {i+1}</text>
+          <text key={i} x={padding + (i + 2) * stageWidth + 20} y={40} className="text-sm font-bold fill-slate-500 uppercase tracking-widest">Stage {i + 1}</text>
         ))}
+        <text x={padding + (logN + 2) * stageWidth - 10} y={40} className="text-sm font-bold fill-slate-500 uppercase tracking-widest">Output X[k]</text>
 
         {/* Input Connections */}
         {Array.from({ length: N }).map((_, rowIndex) => {
@@ -117,9 +118,9 @@ const ButterflyVisualizer: React.FC<Props> = ({
             <g key={`row-${rowIndex}`}>
               <text x={xInput - 20} y={y + 5} textAnchor="end" className="text-[11px] fill-slate-400 code-font font-bold">[{rowIndex}]</text>
               <circle cx={xInput} cy={y} r={nodeRadius} fill="#cbd5e1" />
-              <line 
-                x1={xInput} y1={y} x2={xReorder} y2={yReorder} 
-                stroke={isBitReverseActive ? HIGHLIGHT_COLOR : INACTIVE_COLOR} 
+              <line
+                x1={xInput} y1={y} x2={xReorder} y2={yReorder}
+                stroke={isBitReverseActive ? HIGHLIGHT_COLOR : INACTIVE_COLOR}
                 strokeWidth={isBitReverseActive ? HIGHLIGHT_STROKE : 1}
                 strokeDasharray={isBitReverseActive ? "0" : "4 2"}
                 markerEnd={isBitReverseActive ? "url(#arrow-active)" : "url(#arrow)"}
@@ -161,18 +162,18 @@ const ButterflyVisualizer: React.FC<Props> = ({
               {(teacherMode || isStageActive) && stageButterflies.map((bf, bfIdx) => {
                 const yB = padding + bf.indexB * rowHeight;
                 const isActive = isStageActive && (activeButterflyIndex === -1 || activeButterflyIndex === bfIdx);
-                
+
                 return (
                   <g key={`bf-labels-${bfIdx}`} className="pointer-events-none select-none">
                     <g transform={`translate(${xStart + 35}, ${yB - 14})`}>
-                      <rect 
-                        x="-4" y="-14" width="48" height="20" rx="4" 
-                        fill="white" fillOpacity="1" 
-                        stroke={isActive ? HIGHLIGHT_COLOR : "#94a3b8"} 
-                        strokeWidth={isActive ? "2" : "0.5"} 
+                      <rect
+                        x="-4" y="-14" width="48" height="20" rx="4"
+                        fill="white" fillOpacity="1"
+                        stroke={isActive ? HIGHLIGHT_COLOR : "#94a3b8"}
+                        strokeWidth={isActive ? "2" : "0.5"}
                       />
-                      <text 
-                        x="4" y="2" 
+                      <text
+                        x="4" y="2"
                         className={`text-[13px] font-black ${isActive ? 'fill-amber-700' : 'fill-slate-600'}`}
                       >
                         W<tspan dy="3" fontSize="9">{bf.twiddleN}</tspan><tspan dy="-3" fontSize="9">{bf.twiddleK}</tspan>
@@ -180,13 +181,13 @@ const ButterflyVisualizer: React.FC<Props> = ({
                     </g>
 
                     <g transform={`translate(${xEnd - 40}, ${yB - 10})`}>
-                       <rect x="-2" y="-12" width="22" height="18" rx="3" fill="white" fillOpacity="0.8" />
-                       <text 
-                          x="0" y="2" 
-                          className={`text-[14px] font-black ${isActive ? 'fill-red-600' : 'fill-slate-500'}`}
-                       >
-                         -1
-                       </text>
+                      <rect x="-2" y="-12" width="22" height="18" rx="3" fill="white" fillOpacity="0.8" />
+                      <text
+                        x="0" y="2"
+                        className={`text-[14px] font-black ${isActive ? 'fill-red-600' : 'fill-slate-500'}`}
+                      >
+                        -1
+                      </text>
                     </g>
                   </g>
                 );
@@ -207,23 +208,40 @@ const ButterflyVisualizer: React.FC<Props> = ({
             </g>
           );
         })}
+        {/* Output Labels */}
+        {Array.from({ length: N }).map((_, rowIndex) => {
+          const y = padding + rowIndex * rowHeight;
+          const xEnd = padding + (logN + 1) * stageWidth;
+          const isActive = activeStage === logN + 1 || (activeStage === logN && activeButterflyIndex === -1); // Highlight when complete
+
+          return (
+            <text
+              key={`out-${rowIndex}`}
+              x={xEnd + 15}
+              y={y + 5}
+              className={`text-[12px] font-bold code-font ${isActive ? 'fill-blue-600' : 'fill-slate-500'}`}
+            >
+              X[{rowIndex}]
+            </text>
+          );
+        })}
       </svg>
 
       {/* Floating Operations Counter Panel */}
       <div className="absolute bottom-6 left-6 pointer-events-none animate-in fade-in slide-in-from-left-4 duration-500">
         <div className="bg-slate-900/90 backdrop-blur-md border border-slate-700 p-4 rounded-xl shadow-2xl text-white">
           <div className="flex items-center gap-2 mb-3">
-             <i className="fas fa-calculator text-blue-400"></i>
-             <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Live Operation Counter</h4>
+            <i className="fas fa-calculator text-blue-400"></i>
+            <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Live Operation Counter</h4>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-               <div className="text-[10px] text-slate-500 uppercase font-bold">Complex Mults</div>
-               <div className="text-xl font-mono text-blue-400 font-bold">{liveOps.mults}</div>
+              <div className="text-[10px] text-slate-500 uppercase font-bold">Complex Mults</div>
+              <div className="text-xl font-mono text-blue-400 font-bold">{liveOps.mults}</div>
             </div>
             <div className="space-y-1">
-               <div className="text-[10px] text-slate-500 uppercase font-bold">Complex Adds</div>
-               <div className="text-xl font-mono text-emerald-400 font-bold">{liveOps.adds}</div>
+              <div className="text-[10px] text-slate-500 uppercase font-bold">Complex Adds</div>
+              <div className="text-xl font-mono text-emerald-400 font-bold">{liveOps.adds}</div>
             </div>
           </div>
           {activeStage > 0 && (
@@ -237,8 +255,8 @@ const ButterflyVisualizer: React.FC<Props> = ({
       <div className="absolute top-4 left-4 z-10 pointer-events-none space-y-2">
         {!teacherMode && activeStage === 0 && (
           <div className="bg-blue-600 text-white p-3 rounded-lg shadow-lg border border-blue-500 flex items-center gap-3">
-             <i className="fas fa-info-circle"></i>
-             <p className="text-sm font-bold">Enable "TEACHER MODE" to see all twiddle factors permanently.</p>
+            <i className="fas fa-info-circle"></i>
+            <p className="text-sm font-bold">Enable "TEACHER MODE" to see all twiddle factors permanently.</p>
           </div>
         )}
       </div>
